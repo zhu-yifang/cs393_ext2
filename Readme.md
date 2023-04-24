@@ -1,4 +1,4 @@
-# Austin and Yifang CSCI 393 Ext2 Filesystem Final Project
+# Austin and Yifang Ext2 Filesystem Final Project
 
 ## Project goal
 
@@ -37,7 +37,9 @@ Implementation for supporting for large files for `cat`:
 - each of these direct pointers stores a block number that can used to index into the Ext2 filesystem's `blocks` vector to attain the data stored in bytes. 
 - if a block number is equal to `0`, it is invalid and there are no more blocks to read, so our function returns the data. 
 - if the given file inode requires more space, we use the singly indirect pointer, then the doubly indirect pointer, and lastly the triply indirect pointer by calling the `read_file_indir_ptr`, `read_file_doubly_ptr`, and `read_file_triply_ptr` methods, respectively. 
-- `read_file_indir_ptr` accesses the indirect pointer block from the block number given and an entry pointer is assigned to point to the head of this indirect block. To read this entire block, we iterate with a byte offset of 4 since the block is an array of `u8` and we want to read every 4 bytes in order to attain the direct block numbers stored in the indirect block as `u32`. `read_file_doubly_ptr` and `read_file_triply_ptr` behave similarly, calling the pointer's function below them, using each of their stored block numbers as input and extending the vector of bytes we are returning.
+- `read_file_indir_ptr` accesses the indirect pointer block from the block number given and an entry pointer is assigned to point to the head of this indirect block. 
+  - To read this entire block, we iterate with a byte offset of 4 since the block is an array of `u8` and we want to read every 4 bytes in order to attain the direct block numbers (`u32`).
+- `read_file_doubly_ptr` and `read_file_triply_ptr` behave similarly, calling the pointer's function below them, using each of their stored block numbers as input and extending the vector of bytes we are returning.
 
 ### Supporting large directories for `ls` and `cd`
 
