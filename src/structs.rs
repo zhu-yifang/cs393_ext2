@@ -65,7 +65,6 @@ pub struct Superblock {
     pub block_uid: u16,
     /// Group ID that can use reserved blocks
     pub block_gid: u16,
-
     /// First non-reserved inode in file system.
     pub first_inode: u32,
     /// Size of each inode structure in bytes. - only 128 bytes seem used

@@ -93,8 +93,11 @@ impl Ext2 {
     }
 
     // given a (1-indexed) inode number, return that #'s inode structure
+    // the inode number is a unique identifier among the entire filesystem
     pub fn get_inode(&self, inode: usize) -> &Inode {
+        // find the block group that contains the inode
         let group: usize = (inode - 1) / self.superblock.inodes_per_group as usize;
+        // find the index of the inode within the block group
         let index: usize = (inode - 1) % self.superblock.inodes_per_group as usize;
 
         // println!("in get_inode, inode num = {}, index = {}, group = {}", inode, index, group);
@@ -448,9 +451,66 @@ fn main() -> Result<()> {
                 }
             } else if line.starts_with("mkdir") {
                 // `mkdir childname`
-                // create a directory with the given name, add a link to cwd
                 // consider supporting `-p path/to_file` to create a path of directories
-                println!("mkdir not yet implemented");
+                let elts: Vec<&str> = line.split(' ').collect();
+                // check valid argument
+                if elts.len() != 2 {
+                    println!("usage: mkdir dirname");
+                    continue;
+                }
+                let dirname = elts[1];
+                // check directory name unique in cwd
+                for dir in &dirs {
+                    // dir.0 is inode number
+                    // dir.1 is the name of the directory
+                    // 
+                    if dir.1.to_string() == dirname
+                        && (ext2.get_inode(dir.0).type_perm & structs::TypePerm::DIRECTORY)
+                            == structs::TypePerm::DIRECTORY
+                    {
+                        println!("directory name already exists in cwd");
+                        continue;
+                    }
+                }
+                // check if at least one unallocated inode in the whole filesystem
+                if ext2.superblock.free_inodes_count < 1 {
+                    println!("no unallocated inodes available");
+                    continue;
+                }
+                // find the first block group with an unallocated inode
+                // block_groups is an array of BlockGroupDescriptors
+                let mut group_idx = 0;
+                for i in 0..ext2.block_groups.len() {
+                    if ext2.block_groups[i].free_inodes_count > 0 {
+                        group_idx = i;
+                        break;
+                    }
+                }
+                let block_group = ext2.block_groups[group_idx];
+                // Test
+                ext2.blocks[block_group.inode_usage_addr];
+
+                // find the first unallocated inode in that block group by using the inode usage bitmap of the block group
+                // inode_usage_addr is the block address of inode usage bitmap
+
+
+                
+                // we don't handle the possible panics here since it is essential to be able to get the inode bitmap
+                // convert inode_usage_addr from u32 to usize because read_dir_inode only takes in inode usize argument
+                let usize_addr = usize::try_from(block_group.inode_usage_addr).unwrap();
+                // TO-DO: read_dir_inode takes in a block number ??? is block address the same as number?????? idk anymore
+                let inode_usage_bitmap = ext2.read_dir_inode(usize_addr).unwrap();
+                
+
+
+                // Update block group information
+                block_group.free_inodes_count -= 1;
+                block_group.dirs_count += 1;
+
+                // allocate an inode
+                // create a directory with the given name, add a link to cwd
+                    // current_working_inode
+
             } else if line.starts_with("cat") {
                 // `cat filename`
                 // print the contents of filename to stdout

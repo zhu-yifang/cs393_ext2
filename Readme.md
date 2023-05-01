@@ -45,20 +45,41 @@ Implementation for supporting for large files for `cat`:
 
 The logic for implementing large directory support for `ls` and `cd` is very similar. We implemented a method `read_dir_inode` that almost mimics `read_file_inode`, but we are iterating with the byte offset of the directory's entry size instead. Therefore, we're not just reading the whole direct pointer block's data at a time. 
 
+### Implement `mkdir`
+
+#### Check if the directory name is unique in the current working directory:
+
+To check the inode type, we use the `type_perm` field, which is a bitflag. As such, we can use the bitwise `&` operator to check if the inode is a directory. For instance, if we want to check if the inode is a directory, we can do something like this:
+  - `if (ext2.get_inode(dir.0).type_perm & structs::TypePerm::DIRECTORY) == structs::TypePerm::DIRECTORY`
+  - The return type of `ext2.get_inode(dir.0).type_perm & structs::TypePerm::DIRECTORY` is a bitflag, so you can compare it with `structs::TypePerm::DIRECTORY` to see if it is a directory.
+
+#### Check if there is at least one unallocated inode in the filesystem
+
+This can be done simply by checking the superblock's `free_inode_count`
+
+#### Find the first block group with an unallocated inode
+
+`block_groups` is an array of `BlockGroupDescriptors`. We iterate through these block groups to find the first one with a `free_inodes_count` of at least `1`. 
+
+#### Use the inode bitmap to find the first unused inode
+
+Something
+
 ## What we learned
 
-Overall, we have learned a lot about how pointers work within filesystems and how data gets stored. We learned that these pointers, even direct pointers, point to block numbers instead of actual data. These block numbers are used to attain the data from the filesystem blocks.
+Overall, we have learned a lot about how pointers work within filesystems and how data gets stored. We learned that these pointers, even direct pointers, point to block numbers instead of actual data. These block numbers are used to attain the data from the blocks of the filesystem.
 
 ## Interesting Next Steps
 
 - Write tests 
   - Currently, the `beemovie.txt` file in the `myfsplusbeemovie.ext2` disk image file can only test our `cat` function up to singly indirect pointers 
   - large directories for `ls` and `cd` do not have a disk image file for testing; currently, only direct pointers are being used when calling these functions 
-- Fix `read_fir_inode`
+- Fix `read_dir_inode`
   - since we're reading block by block but the entry size of a directory is not fixed, its data may be stored in two different blocks
 - Handle reading sparse files
   - Our code currently reads and appends data block by block, starting from direct pointer blocks. So, we stop reading a file as soon as we encounter a `0` in a block. 
 - writing sparse files
   - `seek` function
+- we didn't use our time implementing paths for functions like `cd` (e.g., cd dir_1/dir_2 should move you down 2 directories) since the same thing can be done by just `cd`ing into `dir_1` then `dir_2`, but this would be a convenient functionality to add in the future given more time
 
 Credits: Reed College CS393 students, @tzlil on the Rust #osdev discord
