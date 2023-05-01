@@ -80,6 +80,6 @@ Overall, we have learned a lot about how pointers work within filesystems and ho
   - Our code currently reads and appends data block by block, starting from direct pointer blocks. So, we stop reading a file as soon as we encounter a `0` in a block. 
 - writing sparse files
   - `seek` function
-- we didn't use our time implementing paths for functions like `cd` (e.g., cd dir_1/dir_2 should move you down 2 directories) since the same thing can be done by just `cd`ing into `dir_1` then `dir_2`, but this would be a convenient functionality to add in the future given more time
+- we didn't spend our time implementing paths for functions like `cd` (e.g., cd dir_1/dir_2 should move you down 2 directories), but this would be a convenient functionality to add given more time
 
 Credits: Reed College CS393 students, @tzlil on the Rust #osdev discord
