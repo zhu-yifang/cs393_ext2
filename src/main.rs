@@ -15,7 +15,7 @@ use zerocopy::ByteSlice;
 #[derive(Debug)]
 pub struct Ext2 {
     pub superblock: &'static Superblock,
-    pub block_groups: &'static [BlockGroupDescriptor],
+    pub block_groups: &'static mut [BlockGroupDescriptor],
     pub blocks: Vec<&'static [u8]>,
     pub block_size: usize,
     pub uuid: Uuid,
@@ -61,8 +61,8 @@ impl Ext2 {
         let block_groups_rest_bytes = header_body_bytes.1.split_at(block_size);
 
         let block_groups = unsafe {
-            std::slice::from_raw_parts(
-                block_groups_rest_bytes.0.as_ptr() as *const BlockGroupDescriptor,
+            std::slice::from_raw_parts_mut(
+                block_groups_rest_bytes.0.as_ptr() as *mut BlockGroupDescriptor,
                 block_group_count,
             )
         };
