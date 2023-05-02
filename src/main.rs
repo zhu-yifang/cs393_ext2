@@ -486,9 +486,7 @@ fn main() -> Result<()> {
                         break;
                     }
                 }
-                let block_group = ext2.block_groups[group_idx];
-                // Test
-                ext2.blocks[block_group.inode_usage_addr];
+                let mut block_group = &mut ext2.block_groups[group_idx];
 
                 // find the first unallocated inode in that block group by using the inode usage bitmap of the block group
                 // inode_usage_addr is the block address of inode usage bitmap
