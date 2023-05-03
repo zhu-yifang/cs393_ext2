@@ -491,15 +491,40 @@ fn main() -> Result<()> {
                 // find the first unallocated inode in that block group by using the inode usage bitmap of the block group
                 // inode_usage_addr is the block address of inode usage bitmap
 
+                let inode_usage_bitmap = ext2.blocks[block_group.inode_usage_addr as usize];
+                println!("inode_usage_bitmap: {:?}", inode_usage_bitmap); // this line prints out the bitmap for debugging purposes
+                println!("inode_usage_bitmap length: {:?}", inode_usage_bitmap.len()); // this line prints out the bitmap length for debugging purposes
+                // Read bitmap, figure out the first unallocated inode
+                // Each byte represents the allocation status of 8 inodes
+                // For each byte, use bitwise operations to check allocation status of inode bit
+                // if bit is 0 --> inode is unallocated
+                // if bit is 1 --> the inode is allocated
+                // should read the bitmap from back to front
+                
+                let mut first_unallocated_inode = 0;
+                // read bitmap from the back
+                // we have 2 block groups, each with an inode usage bitmap
+                // each inode usage bitmap has a length of 1024 which can represent 1024*8 inodes
+                // 
+                // we only have 2568 inodes, so space is wasted
+                // 2568/8 = only 320 bytes needed to represent all inodes in filesystem
+                for i in (0..inode_usage_bitmap.len()).rev() {
+                    // inode is 1-indexed
+                    for bit in (1..9).rev() {
+                        if bit == 1 {
+                            todo!();
+                            println!("good");
+                        } else if bit == 0 {
+                            println!("bad");
+                        }
+                    }
+                }     
+
+           
+
+
 
                 
-                // we don't handle the possible panics here since it is essential to be able to get the inode bitmap
-                // convert inode_usage_addr from u32 to usize because read_dir_inode only takes in inode usize argument
-                let usize_addr = usize::try_from(block_group.inode_usage_addr).unwrap();
-                // TO-DO: read_dir_inode takes in a block number ??? is block address the same as number?????? idk anymore
-                let inode_usage_bitmap = ext2.read_dir_inode(usize_addr).unwrap();
-                
-
 
                 // Update block group information
                 block_group.free_inodes_count -= 1;
