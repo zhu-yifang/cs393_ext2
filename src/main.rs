@@ -494,6 +494,7 @@ fn main() -> Result<()> {
                 let inode_usage_bitmap = ext2.blocks[block_group.inode_usage_addr as usize];
                 println!("inode_usage_bitmap: {:?}", inode_usage_bitmap); // this line prints out the bitmap for debugging purposes
                 println!("inode_usage_bitmap length: {:?}", inode_usage_bitmap.len()); // this line prints out the bitmap length for debugging purposes
+
                 // Read bitmap, figure out the first unallocated inode
                 // Each byte represents the allocation status of 8 inodes
                 // For each byte, use bitwise operations to check allocation status of inode bit
@@ -501,29 +502,38 @@ fn main() -> Result<()> {
                 // if bit is 1 --> the inode is allocated
                 // should read the bitmap from back to front
                 
-                let mut first_unallocated_inode = 0;
+                let mut first_unallocated_inode;
                 // read bitmap from the back
                 // we have 2 block groups, each with an inode usage bitmap
                 // each inode usage bitmap has a length of 1024 which can represent 1024*8 inodes
                 // 
-                // we only have 2568 inodes, so space is wasted
-                // 2568/8 = only 320 bytes needed to represent all inodes in filesystem
+                // we only have 2560 inodes, so space is wasted
+                // 2560/8 = only 320 bytes needed to represent all inodes in filesystem
                 for i in (0..inode_usage_bitmap.len()).rev() {
                     // inode is 1-indexed
-                    for bit in (1..9).rev() {
-                        if bit == 1 {
-                            todo!();
-                            println!("good");
-                        } else if bit == 0 {
-                            println!("bad");
+                    const MASK: u8 = 1;
+                    let len = inode_usage_bitmap.len();
+                    for bit in 1..9 {
+                        // check if inode is unallocated
+                        if (inode_usage_bitmap[i] & (MASK << (bit - 1))) == 0 {
+                            println!("{}", inode_usage_bitmap[i]);
+                            println!("{}", MASK << (bit - 1));
+                            // inode is unallocated
+                            // inode number is 1-indexed
+                            first_unallocated_inode = ((len - i) * 8) + bit;
+                            break;
                         }
                     }
-                }     
+                }
 
-           
-
-
-
+                // Create DirectoryEntry
+                let mut new_dir = structs::DirectoryEntry {
+                    inode: first_unallocated_inode as u32,
+                    entry_size: 123,
+                    name_length: dirname.len() as u8,
+                    type_indicator: structs::TypeIndicator::Directory,
+                    name: NulStr::from(dirname).unwrap(),
+                };
                 
 
                 // Update block group information
