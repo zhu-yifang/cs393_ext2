@@ -527,13 +527,13 @@ fn main() -> Result<()> {
                 }
 
                 // Create DirectoryEntry
-                let mut new_dir = structs::DirectoryEntry {
-                    inode: first_unallocated_inode as u32,
-                    entry_size: 123,
-                    name_length: dirname.len() as u8,
-                    type_indicator: structs::TypeIndicator::Directory,
-                    name: NulStr::from(dirname).unwrap(),
-                };
+                // let mut new_dir = structs::DirectoryEntry {
+                //     inode: first_unallocated_inode as u32,
+                //     entry_size: 123,
+                //     name_length: dirname.len() as u8,
+                //     type_indicator: structs::TypeIndicator::Directory,
+                //     name: NulStr::from(dirname).unwrap(),
+                // };
                 
 
                 // Update block group information

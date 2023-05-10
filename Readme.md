@@ -28,7 +28,7 @@ cat not yet implemented
 
 ### **TO-DO** Return raw bytes ... (Explain this)
 
-**TO-DO**: (Explain `read_file_inode` returns raw bytes instead of string to account for a UTF character (2 bytes) possibly being stored in two different blocks for `cat`)
+Because the size of UTF characters are not fixed, it is possible for a single UTF character to be split across two different blocks. For example, if a character is 2 Bytes in length, the first Byte may be stored at the end of one block, while the second Byte is stored at the beginning of another block. To handle this, we concatenate all of the raw bytes together and return them as a byte vector instead of reading each block individually and converting them to a string.
 
 ### Supporting large files for `cat`
 
@@ -63,7 +63,20 @@ This can be done simply by checking the superblock's `free_inode_count`
 
 #### Use the inode bitmap to find the first unused inode
 
-Something
+Every bitmap is stored in a block, which is an array of bytes. Each byte represents the allocation status of 8 inodes. For each byte, we use bitwise operations to check the allocation status of each bit of the inode. A bit of `0` means the inode is unallocated and a bit of `1` means the inode is allocated. 
+
+The length of a block is 1024 bytes or 1 KB, so each block can represent `1024*8` or `8192` inodes. We only have `2560` in the whole filesystem, so a lot of space in each inode bitmap is wasted. 
+
+#### Next steps
+
+Unfortunately, we did not have enough time to finish implementating `mkdir`. We believe the next step would be to initialize a new `DirectoryEntry` with `first_unallocated_inode`. There is currently an error in our code because the `name` attribute of `DirectoryEntry` is of type `NulStr`, which causes an error:
+```
+the size for values of type `null_terminated::Opaque` cannot be known at compilation time
+within `DirectoryEntry`, the trait `Sized` is not implemented for `null_terminated::Opaque`
+structs must have a statically known size to be initialized
+```
+After creating a new `DirectoryEntry`, we would need to append it to the parent direcory's data and modify the inode usage bitmap to properly reflect the allocation of the particular inode. 
+
 
 ## What we learned
 
