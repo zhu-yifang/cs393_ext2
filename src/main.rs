@@ -257,7 +257,7 @@ impl Ext2 {
         // indirect pointer points to a block full of direct block numbers/addresses
         // block addresses/numbers stored in the block are all 32-bit
         let indir_block = self.blocks[block_num];
-        // this pointer points to the head of the indirect block
+        // entry_ptr points to the head of the indirect block
         let entry_ptr = indir_block.as_ptr();
         // byte_offset is the offset in bytes from the head of the indirect block, like the index of an array
         let mut byte_offset: isize = 0;
@@ -270,7 +270,7 @@ impl Ext2 {
             }
             let data = self.blocks[dir_block_num as usize];
             ret.extend_from_slice(data);
-            // block is an array of u8, want to read every 4 bytes
+            // since the block number is 32-bit, we increment by 4 bytes
             byte_offset += 4;
         }
         Ok(ret)
