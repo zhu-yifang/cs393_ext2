@@ -28,7 +28,7 @@ cat not yet implemented
 
 ### Handling split UTF characters for `cat`
 
-Because the size of UTF characters are not fixed, it is possible for a single UTF character to be split across two different blocks. For example, if a character is 2 Bytes in length, the first Byte may be stored at the end of one block, while the second Byte is stored at the beginning of another block. To handle this, we concatenate all of the raw bytes together and return them as a byte vector instead of reading each block individually and converting them to a string.
+Because the size of UTF characters is not fixed, it is possible for a single UTF character to be split across two different blocks. For example, if a character is 2 Bytes in length, the first Byte may be stored at the end of one block, while the second Byte is stored at the beginning of another block. To handle this, we concatenate all of the raw bytes together and return them as a byte vector instead of reading each block individually and converting them to a string.
 
 This is implemented in `read_file_inode`. Refer to commented code around lines `318`-`374` for a more specific/ detailed walkthrough of our implementation.
 
@@ -71,7 +71,7 @@ The length of a block is 1024 bytes or 1 KB, so each block can represent `1024*8
 
 #### Next steps
 
-Unfortunately, we did not have enough time to finish implementating `mkdir`. We believe the next step would be to initialize a new `DirectoryEntry` with `first_unallocated_inode`. There is currently an error in our code because the `name` attribute of `DirectoryEntry` is of type `NulStr`, which causes an error:
+Unfortunately, we did not have enough time to finish implementing `mkdir`. We believe the next step would be to initialize a new `DirectoryEntry` with `first_unallocated_inode`. There is currently an error in our code because the `name` attribute of `DirectoryEntry` is of type `NulStr`, which causes an error:
 ```
 the size for values of type `null_terminated::Opaque` cannot be known at compilation time
 within `DirectoryEntry`, the trait `Sized` is not implemented for `null_terminated::Opaque`
